@@ -29,6 +29,6 @@ deploy:
     token:
       secure: M/doJ7lx5P4O4slmIRw0iSYd5Hs/q8aWrH3raBdc07aVlixPuFQ1q8jGaLZ2R2E5V3vzahxV0qAciqyKwjvd0iksO4ZnpAvdlGmzzqRI10KXo6VqA4xS7AurVfqiTz95d4pZMdAEQszc+U3CJwKaa5yiTfbCC/lDcn9L3JGDOlvJc9vNysYHLOBSNhHeD2nkPgL86Ka1cAyvIGLVS5EEotSqamdgLpDIRwivz7F6NrAI29m9dO2JBTPV2UwsAhuCl9YV9alTvB+fju0RVoORoRPkbH3xS8eM8F5sexF6gHO7KF5UfpVtf2FhnA0AN4sX2imt4pqxLso40FcJ9odUqksgBgmkmCHR3Q0eRB6MVrfn658vqomZCsswo4oBjIYP2gzzBbVNDrKMxemh+PzSeI+pisAqcmtSGcK/I5XrBP0iO+ZriPh2Xh9dWhgTeotsSjnxQNrDIi7Y96IIHuUWETyLTZkA2OXYRbvcaEc9hafrgDnfqVZwR3Cad3FLNk6xVO0mOxGj4JWdqLsZ0S0RYcj503l+EntNSwJ7C9k7yLbImi41JG2gGzT4GfBcmRElhYCVPeRI6ATZMKAtjdwaq6rS1DH4sSjUxDQsgI5QL8NImV7Iw42m66Q9MAsqE2/RBQEC1tzzlgJzeIa0ht52UoJHgqmTTH9kJPwzgvwoGR4=
     edge: true
-    skip_cleanup: true
     on:
+      condition: $TRAVIS_RUST_VERSION = stable
       tags: true

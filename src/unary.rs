@@ -9,7 +9,7 @@ macro_rules! _parse_unary_op {
 #[macro_export]
 macro_rules! _impl_unary_op_internal {
     ($ops_trait:ident, $ops_fn:ident, &$lhs:ty, $out:ty, $lhs_i:ident, $body:block) => {
-        impl<'a> ops::$ops_trait for &'a $lhs {
+        impl ::std::ops::$ops_trait for &$lhs {
             type Output = $out;
 
             fn $ops_fn(self) -> Self::Output {
@@ -19,7 +19,7 @@ macro_rules! _impl_unary_op_internal {
         }
     };
     ($ops_trait:ident, $ops_fn:ident, $lhs:ty, $out:ty, $lhs_i:ident, $body:block) => {
-        impl ops::$ops_trait for $lhs {
+        impl ::std::ops::$ops_trait for $lhs {
             type Output = $out;
 
             fn $ops_fn(self) -> Self::Output {

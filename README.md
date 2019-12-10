@@ -1,21 +1,22 @@
-# impl_ops [![Build Status]][travis] [![Latest Version]][crates.io]
+# auto_ops [![Build Status]][travis] [![Latest Version]][crates.io]
 
-[Build Status]: https://api.travis-ci.org/brianwp3000/impl_ops.svg?branch=master
-[travis]: https://travis-ci.org/brianwp3000/impl_ops
-[Latest Version]: https://img.shields.io/crates/v/impl_ops.svg
-[crates.io]: https://crates.io/crates/impl_ops
+[Build Status]: https://api.travis-ci.org/carbotaniuman/auto_ops.svg?branch=master
+[travis]: https://travis-ci.org/carbotaniuman/auto_ops
+[Latest Version]: https://img.shields.io/crates/v/auto_ops.svg
+[crates.io]: https://crates.io/crates/auto_ops
 
 Macros for easy operator overloading.
 
-[Documentation](https://docs.rs/impl_ops/)
+[Documentation](https://docs.rs/auto_ops/)
+
+This library is forked from the original [impl_ops](https://github.com/brianwp3000/auto_ops) by brianwp3000.
 
 This library makes writing multiple `impl std::ops::<op>` blocks much faster, especially when you want operators defined for both owned and borrowed variants of the inputs.
 
-To use, include `#[macro_use] extern crate impl_ops;` in your crate and `use std::ops;` in your module. Remember that you can only overload operators between one or more types defined in the current crate.
+To use, import the macros with `use auto_ops::*;`. Remember that you can only overload operators between one or more types defined in the current crate (respecting Rust orphan rules).
 # Examples
 ```rust
-#[macro_use] extern crate impl_ops;
-use std::ops;
+use auto_ops::*;
 
 #[derive(Clone, Debug, PartialEq)]
 struct DonkeyKong {
@@ -44,4 +45,4 @@ fn main() {
 ```
 
 # Roadmap
-The syntax is essentially finished, but I still need to implement `Index`, `IndexMut`, `Deref`, and `DerefMut`. I'm already using this in a few personal projects, but I want to make sure it works in more real-world scenarios before committing to maintain a stable API. 
+With Rust lifetime inference changes, implementations for generic (over types and lifetimes) impls are being worked on.

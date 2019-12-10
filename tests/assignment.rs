@@ -1,8 +1,4 @@
-//#![feature(trace_macros)]
-//trace_macros!(true);
-
-use impl_ops::{impl_op, impl_op_ex};
-use std::ops;
+use auto_ops::{impl_op, impl_op_ex};
 
 mod kong {
     #[derive(Clone, Copy, Debug, Default, PartialEq)]
@@ -51,7 +47,7 @@ mod kong {
 }
 
 mod impl_op_operators {
-    pub use super::*;
+    use super::*;
 
     impl_op!(+= |a: &mut kong::Donkey, b: kong::Diddy| { a.bananas += b.bananas; });
     #[test]
@@ -135,7 +131,7 @@ mod impl_op_operators {
 }
 
 mod impl_op_variants {
-    pub use super::*;
+    use super::*;
 
     impl_op!(+= |a: &mut kong::Donkey, b: kong::Dixie| { a.bananas += b.bananas; });
     #[test]
@@ -155,7 +151,7 @@ mod impl_op_variants {
 }
 
 mod impl_op_ex_variants {
-    pub use super::*;
+    use super::*;
 
     impl_op_ex!(-= |a: &mut kong::Donkey, b: kong::Dixie| { a.bananas -= b.bananas; });
     #[test]

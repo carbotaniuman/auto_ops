@@ -1,8 +1,4 @@
-//#![feature(trace_macros)]
-//trace_macros!(true);
-
-use impl_ops::{impl_op, impl_op_commutative, impl_op_ex, impl_op_ex_commutative};
-use std::ops;
+use auto_ops::{impl_op, impl_op_commutative, impl_op_ex, impl_op_ex_commutative};
 
 mod kong {
     #[derive(Clone, Copy, Debug, Default, PartialEq)]

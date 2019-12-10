@@ -1,16 +1,12 @@
 [package]
-name = "impl_ops"
-version = "0.1.1"
-authors = ["Brian Porter <brianwp3000@gmail.com>"]
+name = "auto_ops"
+version = "0.1.0"
+authors = ["Quy Nguyen <quy.d.x.nguyen@gmail.com>"]
 license="MIT"
 description = "Macros for easy operator overloading."
 keywords = ["macro", "operator", "overloading", "impl", "op"]
-categories = ["rust-patterns"]
+categories = ["rust-patterns", "no_std"]
 edition = "2018"
-repository = "https://github.com/brianwp3000/impl_ops"
-include = [
-    "**/*.rs",
-    "Cargo.toml",
-]
+repository = "https://github.com/carbotaniuman/auto_ops"
 
 [dependencies]

@@ -1,10 +1,11 @@
+#![no_std]
 //! Macros for easy operator overloading.
 //!
 //! The primary macro to learn is `impl_op!(<op> <closure>);`
 //! where `<op>` is an operator and `<closure>` is a closure with the same signature as the trait function associated with `<op>`.
 //! The macro you'll actually want to use most of the time, however, is [`impl_op_ex!`](macro.impl_op_ex.html). It works the same way as `impl_op!` but with some extra magic behind the scenes.
 //!
-//! To use, include `#[macro_use] extern crate impl_ops;` in your crate and `use std::ops;` in your module. Remember that you can only overload operators between one or more types defined in the current crate.
+//! To use, import the macros with `use auto_ops::*;`. Remember that you can only overload operators between one or more types defined in the current crate (respecting Rust orphan rules).
 //! # Examples
 //! All of the following examples are run with the following struct defined:
 //!
@@ -30,8 +31,7 @@
 //! // OP  : +, -, *, /, %, &, |, ^, <<, >>
 //! // a, b: variable names
 //!
-//! #[macro_use] extern crate impl_ops;
-//! use std::ops;
+//! use auto_ops::impl_op;
 //! # #[derive(Clone, Debug, PartialEq)]
 //! # struct DonkeyKong {
 //! #     pub bananas: i32,
@@ -60,8 +60,7 @@
 //! // op  : +=, -=, *=, /=, %=, &=, |=, ^=, <<=, >>=
 //! // a, b: variable names
 //!
-//! #[macro_use] extern crate impl_ops;
-//! use std::ops;
+//! use auto_ops::impl_op;
 //! # #[derive(Clone, Debug, PartialEq)]
 //! # struct DonkeyKong {
 //! #     pub bananas: i32,
@@ -91,8 +90,7 @@
 //! // OP: !, -
 //! // a : variable name
 //!
-//! #[macro_use] extern crate impl_ops;
-//! use std::ops;
+//! use auto_ops::impl_op;
 //! # #[derive(Clone, Debug, PartialEq)]
 //! # struct DonkeyKong {
 //! #     pub bananas: i32,
@@ -116,7 +114,7 @@
 //! * The output type of any operation must be an owned type (i.e. `impl_op!(+ |a: DonkeyKong b: i32| -> &DonkeyKong {...})` is invalid).
 //! * Types that have an unqualified lifetime or associated type are invalid
 //!
-//! ```ignore
+//! ```compile_fail
 //! // impl_op!(+ |a: SomeType<'a>, b: SomeType<'a>| -> SomeType<'a> {...}) // INVALID
 //! // impl_op!(+ |a: SomeType<T>, b: SomeType<T>| -> SomeType<T> {...})    // INVALID
 //! impl_op!(+ |a: SomeType<i32>, b: SomeType<i32>| -> SomeType<i32> {...}) // VALID
@@ -181,7 +179,7 @@ macro_rules! impl_op {
 /// `impl_op_ex!(op |a: &LHS, b: &RHS| -> OUT {...});`
 /// gets expanded to
 ///
-/// ```ignore
+/// ```compile_fail
 /// impl_op!(op |a: LHS, b: RHS| -> OUT {...});
 /// impl_op!(op |a: LHS, b: &RHS| -> OUT {...});
 /// impl_op!(op |a: &LHS, b: RHS| -> OUT {...});
@@ -191,14 +189,13 @@ macro_rules! impl_op {
 /// and `impl_op_ex!(op |a: &LHS, b: RHS| -> OUT {...});`
 /// gets expanded to
 ///
-/// ```ignore
+/// ```compile_fail
 /// impl_op!(op |a: LHS, b: RHS| -> OUT {...});
 /// impl_op!(op |a: &LHS, b: RHS| -> OUT {...});
 /// ```
 /// # Examples
 /// ```
-/// #[macro_use] extern crate impl_ops;
-/// use std::ops;
+/// use auto_ops::impl_op_ex;
 /// # #[derive(Clone, Debug, PartialEq)]
 /// # struct DonkeyKong {
 /// #     pub bananas: i32,
@@ -263,14 +260,14 @@ macro_rules! impl_op_ex {
 ///
 /// An operator is commutative if A <op> B == B <op> A. Common commutative operators are `+` and `*`.
 ///
-/// ```ignore
+/// ```compile_fail
 /// impl_op_commutative!(op |a: LHS, b: RHS| -> OUT {...});
 /// // where LHS != RHS
 /// ```
 ///
 /// gets expanded to
 ///
-/// ```ignore
+/// ```compile_fail
 /// impl_op!(op |a: LHS, b: RHS| -> OUT {...});
 /// impl_op!(op |a: RHS, b: LHS| -> OUT {...});
 /// ```
@@ -278,8 +275,7 @@ macro_rules! impl_op_ex {
 /// See the examples for what happens when you try `impl_op_commutative!` on the `-` operator (which isn't usually commutative).
 /// # Examples
 /// ```
-/// #[macro_use] extern crate impl_ops;
-/// use std::ops;
+/// use auto_ops::impl_op_commutative;
 /// # #[derive(Clone, Debug, PartialEq)]
 /// # struct DonkeyKong {
 /// #     pub bananas: i32,
@@ -332,14 +328,14 @@ macro_rules! impl_op_commutative {
 ///
 /// Expands borrowed inputs to both borrowed and owned variants.
 ///
-/// ```ignore
+/// ```compile_fail
 /// impl_op_ex_commutative!(op |a: &LHS, b: &RHS| -> OUT {...});
 /// // where LHS != RHS
 /// ```
 ///
 /// gets expanded to
 ///
-/// ```ignore
+/// ```compile_fail
 /// impl_op!(op |a: &LHS, b: &RHS| -> OUT {...});
 /// impl_op!(op |a: &LHS, b: RHS| -> OUT {...});
 /// impl_op!(op |a: LHS, b: &RHS| -> OUT {...});
@@ -352,8 +348,7 @@ macro_rules! impl_op_commutative {
 /// ```
 /// # Examples
 /// ```
-/// #[macro_use] extern crate impl_ops;
-/// use std::ops;
+/// use auto_ops::impl_op_ex_commutative;
 /// # #[derive(Clone, Debug, PartialEq)]
 /// # struct DonkeyKong {
 /// #     pub bananas: i32,

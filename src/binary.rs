@@ -42,7 +42,7 @@ macro_rules! _impl_binary_op_internal {
 #[macro_export]
 macro_rules! _impl_binary_op_owned_owned {
     ($ops_trait:ident, $ops_fn:ident, $lhs:ty, $rhs:ty, $out:ty, $lhs_i:ident, $rhs_i:ident, $body:block) => {
-        impl ops::$ops_trait<$rhs> for $lhs {
+        impl ::std::ops::$ops_trait<$rhs> for $lhs {
             type Output = $out;
 
             fn $ops_fn(self, $rhs_i: $rhs) -> Self::Output {
@@ -57,7 +57,7 @@ macro_rules! _impl_binary_op_owned_owned {
 #[macro_export]
 macro_rules! _impl_binary_op_owned_borrowed {
     ($ops_trait:ident, $ops_fn:ident, $lhs:ty, $rhs:ty, $out:ty, $lhs_i:ident, $rhs_i:ident, $body:block) => {
-        impl<'a> ops::$ops_trait<&'a $rhs> for $lhs {
+        impl ::std::ops::$ops_trait<&$rhs> for $lhs {
             type Output = $out;
 
             fn $ops_fn(self, $rhs_i: &$rhs) -> Self::Output {
@@ -72,7 +72,7 @@ macro_rules! _impl_binary_op_owned_borrowed {
 #[macro_export]
 macro_rules! _impl_binary_op_borrowed_owned {
     ($ops_trait:ident, $ops_fn:ident, $lhs:ty, $rhs:ty, $out:ty, $lhs_i:ident, $rhs_i:ident, $body:block) => {
-        impl<'a> ops::$ops_trait<$rhs> for &'a $lhs {
+        impl ::std::ops::$ops_trait<$rhs> for &$lhs {
             type Output = $out;
 
             fn $ops_fn(self, $rhs_i: $rhs) -> Self::Output {
@@ -87,7 +87,7 @@ macro_rules! _impl_binary_op_borrowed_owned {
 #[macro_export]
 macro_rules! _impl_binary_op_borrowed_borrowed {
     ($ops_trait:ident, $ops_fn:ident, $lhs:ty, $rhs:ty, $out:ty, $lhs_i:ident, $rhs_i:ident, $body:block) => {
-        impl<'a, 'b> ops::$ops_trait<&'a $rhs> for &'b $lhs {
+        impl ::std::ops::$ops_trait<&$rhs> for &$lhs {
             type Output = $out;
 
             fn $ops_fn(self, $rhs_i: &$rhs) -> Self::Output {

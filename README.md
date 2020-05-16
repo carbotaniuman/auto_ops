@@ -9,7 +9,7 @@ Macros for easy operator overloading.
 
 [Documentation](https://docs.rs/auto_ops/)
 
-This library is forked from the original [impl_ops](https://github.com/brianwp3000/auto_ops) by brianwp3000.
+This library is forked from the original [impl_ops](https://github.com/brianwp3000/impl_ops) by brianwp3000.
 
 This library makes writing multiple `impl std::ops::<op>` blocks much faster, especially when you want operators defined for both owned and borrowed variants of the inputs.
 

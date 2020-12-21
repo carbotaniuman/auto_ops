@@ -122,12 +122,16 @@
 mod assignment;
 mod binary;
 mod unary;
+mod unary_gen;
+mod assignment_gen;
+mod binary_gen;
 
 /// Overloads an operator using the given closure as its body.
 ///
 /// See the [module level documentation](index.html) for more information.
 #[macro_export]
 macro_rules! impl_op {
+    // non-generic
     ($op:tt |$lhs_i:ident : &mut $lhs:path, $rhs_i:ident : &$rhs:path| $body:block) => {
         $crate::_parse_assignment_op!($op, $lhs, &$rhs, lhs, rhs, {
             |$lhs_i: &mut $lhs, $rhs_i: &$rhs| -> () { $body }(lhs, rhs);
@@ -165,6 +169,48 @@ macro_rules! impl_op {
     };
     ($op:tt |$lhs_i:ident : $lhs:path, $rhs_i:ident : $rhs:path| -> $out:path $body:block) => {
         $crate::_parse_binary_op!($op, $lhs, $rhs, $out, lhs, rhs, {
+            |$lhs_i: $lhs, $rhs_i: $rhs| -> $out { $body }(lhs, rhs)
+        });
+    };
+
+    // generic
+    ($op:tt <$($T:ident $(: $C:ident)?),*> |$lhs_i:ident : &mut $lhs:path, $rhs_i:ident : &$rhs:path| $body:block) => {
+        $crate::_parse_assignment_op_gen!($op, <$($T $(: $C)?),+>, $lhs, &$rhs, lhs, rhs, {
+            |$lhs_i: &mut $lhs, $rhs_i: &$rhs| -> () { $body }(lhs, rhs);
+        });
+    };
+    ($op:tt <$($T:ident $(: $C:ident)?),*> |$lhs_i:ident : &mut $lhs:path, $rhs_i:ident : $rhs:path| $body:block) => {
+        $crate::_parse_assignment_op_gen!($op, <$($T $(: $C)?),+>, $lhs, $rhs, lhs, rhs, {
+            |$lhs_i: &mut $lhs, $rhs_i: $rhs| -> () { $body }(lhs, rhs);
+        });
+    };
+    ($op:tt <$($T:ident $(: $C:ident)?),*> |$lhs_i:ident : &$lhs:path| -> $out:path $body:block) => {
+        $crate::_parse_unary_op_gen!($op, <$($T $(: $C)?),+>, &$lhs, $out, lhs, {
+            |$lhs_i: &$lhs| -> $out { $body }(lhs)
+        });
+    };
+    ($op:tt <$($T:ident $(: $C:ident)?),*> |$lhs_i:ident : &$lhs:path, $rhs_i:ident : &$rhs:path| -> $out:path $body:block) => {
+        $crate::_parse_binary_op_gen!($op, <$($T $(: $C)?),+>, &$lhs, &$rhs, $out, lhs, rhs, {
+            |$lhs_i: &$lhs, $rhs_i: &$rhs| -> $out { $body }(lhs, rhs)
+        });
+    };
+    ($op:tt <$($T:ident $(: $C:ident)?),*> |$lhs_i:ident : &$lhs:path, $rhs_i:ident : $rhs:path| -> $out:path $body:block) => {
+        $crate::_parse_binary_op_gen!($op, <$($T $(: $C)?),+>, &$lhs, $rhs, $out, lhs, rhs, {
+            |$lhs_i: &$lhs, $rhs_i: $rhs| -> $out { $body }(lhs, rhs)
+        });
+    };
+    ($op:tt <$($T:ident $(: $C:ident)?),*> |$lhs_i:ident : $lhs:path| -> $out:path $body:block) => {
+        $crate::_parse_unary_op_gen!($op, <$($T $(: $C)?),+>, $lhs, $out, lhs, {
+            |$lhs_i: $lhs| -> $out { $body }(lhs)
+        });
+    };
+    ($op:tt <$($T:ident $(: $C:ident)?),*> |$lhs_i:ident : $lhs:path, $rhs_i:ident : &$rhs:path| -> $out:path $body:block) => {
+        $crate::_parse_binary_op_gen!($op, <$($T $(: $C)?),+>, $lhs, &$rhs, $out, lhs, rhs, {
+            |$lhs_i: $lhs, $rhs_i: &$rhs| -> $out { $body }(lhs, rhs)
+        });
+    };
+    ($op:tt <$($T:ident $(: $C:ident)?),*> |$lhs_i:ident : $lhs:path, $rhs_i:ident : $rhs:path| -> $out:path $body:block) => {
+        $crate::_parse_binary_op_gen!($op, <$($T $(: $C)?),+>, $lhs, $rhs, $out, lhs, rhs, {
             |$lhs_i: $lhs, $rhs_i: $rhs| -> $out { $body }(lhs, rhs)
         });
     };
@@ -220,6 +266,7 @@ macro_rules! impl_op {
 /// }
 #[macro_export]
 macro_rules! impl_op_ex {
+    // non-generic
     ($op:tt |$lhs_i:ident : &mut $lhs:path, $rhs_i:ident : &$rhs:path| $body:block) => (
         $crate::_parse_assignment_op!($op, $lhs, &$rhs, lhs, rhs, {|$lhs_i : &mut $lhs, $rhs_i : &$rhs| -> () {$body} (lhs, rhs);});
         $crate::_parse_assignment_op!($op, $lhs, $rhs, lhs, rhs, {|$lhs_i : &mut $lhs, $rhs_i : &$rhs| -> () {$body} (lhs, &rhs);});
@@ -250,6 +297,39 @@ macro_rules! impl_op_ex {
     );
     ($op:tt |$lhs_i:ident : $lhs:path, $rhs_i:ident : $rhs:path| -> $out:path $body:block) => (
         $crate::impl_op!($op |$lhs_i : $lhs, $rhs_i : $rhs| -> $out $body);
+    );
+
+    // generic
+    ($op:tt <$($T:ident $(: $C:ident)?),*> |$lhs_i:ident : &mut $lhs:path, $rhs_i:ident : &$rhs:path| $body:block) => (
+        $crate::_parse_assignment_op_gen!($op, <$($T $(: $C)?),+>, $lhs, &$rhs, lhs, rhs, {|$lhs_i : &mut $lhs, $rhs_i : &$rhs| -> () {$body} (lhs, rhs);});
+        $crate::_parse_assignment_op_gen!($op, <$($T $(: $C)?),+>, $lhs, $rhs, lhs, rhs, {|$lhs_i : &mut $lhs, $rhs_i : &$rhs| -> () {$body} (lhs, &rhs);});
+    );
+    ($op:tt <$($T:ident $(: $C:ident)?),*> |$lhs_i:ident : &mut $lhs:path, $rhs_i:ident : $rhs:path| $body:block) => (
+        $crate::_parse_assignment_op_gen!($op, <$($T $(: $C)?),+>, $lhs, $rhs, lhs, rhs, {|$lhs_i : &mut $lhs, $rhs_i : $rhs| -> () {$body} (lhs, rhs);});
+    );
+    ($op:tt <$($T:ident $(: $C:ident)?),*> |$lhs_i:ident : &$lhs:path| -> $out:path $body:block) => (
+        $crate::_parse_unary_op_gen!($op, <$($T $(: $C)?),+>, &$lhs, $out, lhs, {|$lhs_i : &$lhs| -> $out {$body} (lhs)});
+        $crate::_parse_unary_op_gen!($op, <$($T $(: $C)?),+>, $lhs, $out, lhs, {|$lhs_i : &$lhs| -> $out {$body} (&lhs)});
+    );
+    ($op:tt <$($T:ident $(: $C:ident)?),*> |$lhs_i:ident : &$lhs:path, $rhs_i:ident : &$rhs:path| -> $out:path $body:block) => (
+        $crate::impl_op!($op <$($T $(: $C)?),+> |$lhs_i : &$lhs, $rhs_i : &$rhs| -> $out $body);
+        $crate::_parse_binary_op_gen!($op, <$($T $(: $C)?),+>, &$lhs, $rhs, $out, lhs, rhs, {|$lhs_i : &$lhs, $rhs_i : &$rhs| -> $out {$body} (lhs, &rhs)});
+        $crate::_parse_binary_op_gen!($op, <$($T $(: $C)?),+>, $lhs, &$rhs, $out, lhs, rhs, {|$lhs_i : &$lhs, $rhs_i : &$rhs| -> $out {$body} (&lhs, rhs)});
+        $crate::_parse_binary_op_gen!($op, <$($T $(: $C)?),+>, $lhs, $rhs, $out, lhs, rhs, {|$lhs_i : &$lhs, $rhs_i : &$rhs| -> $out {$body} (&lhs, &rhs)});
+    );
+    ($op:tt <$($T:ident $(: $C:ident)?),*> |$lhs_i:ident : &$lhs:path, $rhs_i:ident : $rhs:path| -> $out:path $body:block) => (
+        $crate::impl_op!($op <$($T $(: $C)?),+> |$lhs_i : &$lhs, $rhs_i : $rhs| -> $out $body);
+        $crate::_parse_binary_op_gen!($op, <$($T $(: $C)?),+>, $lhs, $rhs, $out, lhs, rhs, {|$lhs_i : &$lhs, $rhs_i : $rhs| -> $out {$body} (&lhs, rhs)});
+    );
+    ($op:tt <$($T:ident $(: $C:ident)?),*> |$lhs_i:ident : $lhs:path|  -> $out:path $body:block) => (
+        $crate::_parse_unary_op_gen!($op, <$($T $(: $C)?),+>, $lhs, $out, lhs, {|$lhs_i : $lhs| -> $out {$body} (lhs)});
+    );
+    ($op:tt <$($T:ident $(: $C:ident)?),*> |$lhs_i:ident : $lhs:path, $rhs_i:ident : &$rhs:path| -> $out:path $body:block) => (
+        $crate::impl_op!($op <$($T $(: $C)?),+> |$lhs_i : $lhs, $rhs_i : &$rhs| -> $out $body);
+        $crate::_parse_binary_op_gen!($op, <$($T $(: $C)?),+>, $lhs, $rhs, $out, lhs, rhs, {|$lhs_i : $lhs, $rhs_i : &$rhs| -> $out {$body} (lhs, &rhs)});
+    );
+    ($op:tt <$($T:ident $(: $C:ident)?),*> |$lhs_i:ident : $lhs:path, $rhs_i:ident : $rhs:path| -> $out:path $body:block) => (
+        $crate::impl_op!($op <$($T $(: $C)?),+> |$lhs_i : $lhs, $rhs_i : $rhs| -> $out $body);
     );
 }
 
@@ -304,6 +384,7 @@ macro_rules! impl_op_ex {
 /// }
 #[macro_export]
 macro_rules! impl_op_commutative {
+    // non-generic
     ($op:tt |$lhs_i:ident : &$lhs:path, $rhs_i:ident : &$rhs:path| -> $out:path $body:block) => (
         $crate::impl_op!($op |$lhs_i : &$lhs, $rhs_i : &$rhs| -> $out $body);
         $crate::_parse_binary_op!($op, &$rhs, &$lhs, $out, lhs, rhs, {|$lhs_i : &$lhs, $rhs_i : &$rhs| -> $out {$body} (rhs, lhs)});
@@ -319,6 +400,24 @@ macro_rules! impl_op_commutative {
     ($op:tt |$lhs_i:ident : $lhs:path, $rhs_i:ident : $rhs:path| -> $out:path $body:block) => (
         $crate::impl_op!($op |$lhs_i : $lhs, $rhs_i : $rhs| -> $out $body);
         $crate::_parse_binary_op!($op, $rhs, $lhs, $out, lhs, rhs, {|$lhs_i : $lhs, $rhs_i : $rhs| -> $out {$body} (rhs, lhs)});
+    );
+
+    // generic
+    ($op:tt <$($T:ident $(: $C:ident)?),*> |$lhs_i:ident : &$lhs:path, $rhs_i:ident : &$rhs:path| -> $out:path $body:block) => (
+        $crate::impl_op!($op <$($T $(: $C)?),+> |$lhs_i : &$lhs, $rhs_i : &$rhs| -> $out $body);
+        $crate::_parse_binary_op!($op, <$($T $(: $C)?),+>, &$rhs, &$lhs, $out, lhs, rhs, {|$lhs_i : &$lhs, $rhs_i : &$rhs| -> $out {$body} (rhs, lhs)});
+    );
+    ($op:tt <$($T:ident $(: $C:ident)?),*> |$lhs_i:ident : &$lhs:path, $rhs_i:ident : $rhs:path| -> $out:path $body:block) => (
+        $crate::impl_op!($op <$($T $(: $C)?),+> |$lhs_i : &$lhs, $rhs_i : $rhs| -> $out $body);
+        $crate::_parse_binary_op!($op, <$($T $(: $C)?),+>, $rhs, &$lhs, $out, lhs, rhs, {|$lhs_i : &$lhs, $rhs_i : $rhs| -> $out {$body} (rhs, lhs)});
+    );
+    ($op:tt <$($T:ident $(: $C:ident)?),*> |$lhs_i:ident : $lhs:path, $rhs_i:ident : &$rhs:path| -> $out:path $body:block) => (
+        $crate::impl_op!($op <$($T $(: $C)?),+> |$lhs_i : $lhs, $rhs_i : &$rhs| -> $out $body);
+        $crate::_parse_binary_op!($op, <$($T $(: $C)?),+>, &$rhs, $lhs, $out, lhs, rhs, {|$lhs_i : $lhs, $rhs_i : &$rhs| -> $out {$body} (rhs, lhs)});
+    );
+    ($op:tt <$($T:ident $(: $C:ident)?),*> |$lhs_i:ident : $lhs:path, $rhs_i:ident : $rhs:path| -> $out:path $body:block) => (
+        $crate::impl_op!($op <$($T $(: $C)?),+> |$lhs_i : $lhs, $rhs_i : $rhs| -> $out $body);
+        $crate::_parse_binary_op!($op, <$($T $(: $C)?),+>, $rhs, $lhs, $out, lhs, rhs, {|$lhs_i : $lhs, $rhs_i : $rhs| -> $out {$body} (rhs, lhs)});
     );
 }
 
@@ -402,6 +501,7 @@ macro_rules! impl_op_commutative {
 /// }
 #[macro_export]
 macro_rules! impl_op_ex_commutative {
+    // non-generic
     ($op:tt |$lhs_i:ident : &$lhs:path, $rhs_i:ident : &$rhs:path| -> $out:path $body:block) => (
         $crate::impl_op_ex!($op |$lhs_i : &$lhs, $rhs_i : &$rhs| -> $out $body);
 
@@ -424,5 +524,30 @@ macro_rules! impl_op_ex_commutative {
     );
     ($op:tt |$lhs_i:ident : $lhs:path, $rhs_i:ident : $rhs:path| -> $out:path $body:block) => (
         $crate::impl_op_commutative!($op |$lhs_i : $lhs, $rhs_i : $rhs| -> $out $body);
+    );
+
+    // generic
+    ($op:tt <$($T:ident $(: $C:ident)?),*> |$lhs_i:ident : &$lhs:path, $rhs_i:ident : &$rhs:path| -> $out:path $body:block) => (
+        $crate::impl_op_ex!($op <$($T $(: $C)?),+> |$lhs_i : &$lhs, $rhs_i : &$rhs| -> $out $body);
+
+        $crate::_parse_binary_op_gen!($op, <$($T $(: $C)?),+>, &$rhs, &$lhs, $out, lhs, rhs, {|$lhs_i : &$lhs, $rhs_i : &$rhs| -> $out {$body} (rhs, lhs)});
+        $crate::_parse_binary_op_gen!($op, <$($T $(: $C)?),+>, &$rhs, $lhs, $out, lhs, rhs, {|$lhs_i : &$lhs, $rhs_i : &$rhs| -> $out {$body} (&rhs, lhs)});
+        $crate::_parse_binary_op_gen!($op, <$($T $(: $C)?),+>, $rhs, &$lhs, $out, lhs, rhs, {|$lhs_i : &$lhs, $rhs_i : &$rhs| -> $out {$body} (rhs, &lhs)});
+        $crate::_parse_binary_op_gen!($op, <$($T $(: $C)?),+>, $rhs, $lhs, $out, lhs, rhs, {|$lhs_i : &$lhs, $rhs_i : &$rhs| -> $out {$body} (&rhs, &lhs)});
+    );
+    ($op:tt <$($T:ident $(: $C:ident)?),*> |$lhs_i:ident : &$lhs:path, $rhs_i:ident : $rhs:path| -> $out:path $body:block) => (
+        $crate::impl_op_ex!($op <$($T $(: $C)?),+> |$lhs_i : &$lhs, $rhs_i : $rhs| -> $out $body);
+
+        $crate::_parse_binary_op_gen!($op, <$($T $(: $C)?),+>, $rhs, &$lhs, $out, lhs, rhs, {|$lhs_i : &$lhs, $rhs_i : $rhs| -> $out {$body} (rhs, lhs)});
+        $crate::_parse_binary_op_gen!($op, <$($T $(: $C)?),+>, $rhs, $lhs, $out, lhs, rhs, {|$lhs_i : &$lhs, $rhs_i : $rhs| -> $out {$body} (&rhs, lhs)});
+    );
+    ($op:tt <$($T:ident $(: $C:ident)?),*> |$lhs_i:ident : $lhs:path, $rhs_i:ident : &$rhs:path| -> $out:path $body:block) => (
+        $crate::impl_op_ex!($op <$($T $(: $C)?),+> |$lhs_i : $lhs, $rhs_i : &$rhs| -> $out $body);
+
+        $crate::_parse_binary_op_gen!($op, <$($T $(: $C)?),+>, &$rhs, $lhs, $out, lhs, rhs, {|$lhs_i : $lhs, $rhs_i : &$rhs| -> $out {$body} (rhs, lhs)});
+        $crate::_parse_binary_op_gen!($op, <$($T $(: $C)?),+>, $rhs, $lhs, $out, lhs, rhs, {|$lhs_i : $lhs, $rhs_i : &$rhs| -> $out {$body} (rhs, &lhs)});
+    );
+    ($op:tt <$($T:ident $(: $C:ident)?),*> |$lhs_i:ident : $lhs:path, $rhs_i:ident : $rhs:path| -> $out:path $body:block) => (
+        $crate::impl_op_commutative!($op <$($T $(: $C)?),+> |$lhs_i : $lhs, $rhs_i : $rhs| -> $out $body);
     );
 }

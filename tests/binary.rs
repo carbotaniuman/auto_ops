@@ -628,3 +628,28 @@ fn infer_lifetimes() {
         do_bitor_2(&kong::Dixie::new(1), &kong::Donkey::new(2))
     );
 }
+
+mod impl_op_sequence_types {
+    use super::*;
+
+    impl_op!(+ |a: kong::Donkey, b: (i32, i32)| -> kong::Donkey { kong::Donkey::new(a.bananas + b.0) });
+    #[test]
+    fn tuple() {
+        assert_eq!(kong::Donkey::new(1 + 2), kong::Donkey::new(1) + (2, 3));
+    }
+
+    impl_op!(+ |a: kong::Donkey, b: [i32; 2]| -> kong::Donkey { kong::Donkey::new(a.bananas + b[0]) });
+    #[test]
+    fn array() {
+        assert_eq!(kong::Donkey::new(1 + 2), kong::Donkey::new(1) + [2, 3]);
+    }
+
+    impl_op!(+ |a: kong::Donkey, b: &[i32]| -> kong::Donkey { kong::Donkey::new(a.bananas + b[0]) });
+    #[test]
+    fn slice() {
+        assert_eq!(
+            kong::Donkey::new(1 + 2),
+            kong::Donkey::new(1) + vec![2, 3].as_slice()
+        );
+    }
+}

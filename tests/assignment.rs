@@ -221,3 +221,31 @@ mod multiline {
         assert_eq!(kong::Donkey::new(0), dk);
     }
 }
+
+mod impl_op_sequence_types {
+    use super::*;
+
+    impl_op!(+= |a: &mut kong::Donkey, b: (i32, i32)| { a.bananas += b.0; });
+    #[test]
+    fn tuple() {
+        let mut dk = kong::Donkey::new(3);
+        dk += (1, 2);
+        assert_eq!(kong::Donkey::new(3 + 1), dk);
+    }
+
+    impl_op!(+= |a: &mut kong::Donkey, b: [i32; 2]| { a.bananas += b[0]; });
+    #[test]
+    fn array() {
+        let mut dk = kong::Donkey::new(3);
+        dk += [1, 2];
+        assert_eq!(kong::Donkey::new(3 + 1), dk);
+    }
+
+    impl_op!(+= |a: &mut kong::Donkey, b: &[i32]| { a.bananas += b[0]; });
+    #[test]
+    fn slice() {
+        let mut dk = kong::Donkey::new(3);
+        dk += vec![1, 2].as_slice();
+        assert_eq!(kong::Donkey::new(3 + 1), dk);
+    }
+}
